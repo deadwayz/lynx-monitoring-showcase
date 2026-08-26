@@ -3,7 +3,7 @@ A looping, animated preview of LYNX — PH → Endpoint Network Monitor
 
 Self-hosted — no public demo (the agent and API run on an internal PC by design).
 
-![LYNX showcase preview](LYNX2.gif)
+![LYNX showcase preview](LYNX.gif)
 
 LYNX was built to answer a question a speedtest can't: not "is the internet fast right now," but *is the PH–AU path behaving the way it's configured to expect* — right now, and over time, with a record to back it up. It continuously measures the real path between the two offices, stores every reading in SQLite, and turns raw latency/loss/jitter/routing data into a plain-language verdict instead of a wall of numbers.
 
