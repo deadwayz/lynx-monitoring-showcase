@@ -1,31 +1,62 @@
-### LYNX Product Showcase
-A looping, animated preview of LYNX — PH → Endpoint Network Monitor
+# LYNX
 
-Self-hosted — no public demo (the agent and API run on an internal PC by design).
+**See the path. Keep the evidence.**
 
-![LYNX showcase preview](LYNX2.gif)
+LYNX is a self-hosted network monitoring application that turns latency, packet loss, jitter, and routing history into an operational record. It helps a team understand whether a configured network path is behaving as expected—and retain evidence when it is not.
 
-LYNX was built to answer a question a speedtest can't: not "is the internet fast right now," but *is the PH–Endpoint path behaving the way it's configured to expect* — right now, and over time, with a record to back it up. It continuously measures the real path between the two offices, stores every reading in SQLite, and turns raw latency/loss/jitter/routing data into a plain-language verdict instead of a wall of numbers.
+![LYNX — network observability](assets/cover.svg)
 
-It exists because of a real incident: a chronic ~180–260 ms latency gap between two ISPs reaching the same endpoint, eventually root-caused to an asymmetric BGP path through a specific Singapore transit hop. LYNX is built to catch that class of problem automatically next time, and hand over evidence for the support ticket without someone reconstructing it by hand.
+[View the preview](#preview) · [Engineering notes](#engineering-notes) · [Project scope](#project-scope)
 
-## What it does
+## Why it exists
 
-- Continuous latency, loss, and jitter measurement between PH and Endpoint, stored in SQLite with automatic rollup and retention
-- A rolling status engine (NORMAL / DEGRADED / CRITICAL) that requires consecutive bad samples before flagging anything — no single noisy ping triggers an incident — and explains every status in plain language, not just a label
-- Automatic route-change detection: every traceroute is diffed against the prior run, with configurable chokepoint watch patterns (e.g. a known problem hop like `level3.net`) flagged the moment they appear or disappear
-- Local-vs-international differentiation, using a synthetic local-gateway target to tell a LAN issue apart from an upstream/international one
-- A human-maintained route map (Manila → Singapore → Sydney → Endpoint) editable from the dashboard — deliberately not auto-derived from incomplete traceroute data
-- CSV/JSON export and one-click PDF report generation, built specifically for attaching evidence to an ISP support ticket
-- A single-page dashboard viewable by the whole team from anywhere, via a Cloudflare Tunnel — without exposing the monitoring PC directly
+A point-in-time speed test cannot explain an intermittent path problem. LYNX grew from the need to compare behavior over time, distinguish local symptoms from upstream ones, and support escalation with a record instead of a recollection.
 
-## Built with
+## Preview
 
-- Node.js + TypeScript — one process runs both the monitoring agent and the read/write API, backed by the same SQLite file
-- SQLite via `better-sqlite3`, with schema migrations handled in-place
-- React + Vite + TypeScript + Tailwind + Recharts + Framer Motion + Lenis
-- Windows Service (`node-windows`) for always-on operation with auto-restart on crash
-- Cloudflare Tunnel + Cloudflare Pages for secure remote dashboard access, with Cloudflare Access recommended as the login gate
-- `pdfkit` for report generation — no headless Chromium required on the mini PC
+![LYNX presentation illustrating network health and route-change evidence](LYNX2.gif)
 
-![LYNX showcase preview](LYNX.gif)
+This is a visual product presentation, not live telemetry. The monitoring agent runs within an authorized network; no public monitoring endpoint is offered.
+
+<details>
+<summary><strong>View the metrics and reporting presentation</strong></summary>
+
+![LYNX animated presentation showing latency history and diagnostic context](LYNX.gif)
+
+</details>
+
+## What the application does
+
+- Continuously collect configured latency, reachability, loss, and jitter measurements.
+- Store measurement history in SQLite with retention and rollup behavior.
+- Evaluate NORMAL, DEGRADED, and CRITICAL status with consecutive-sample rules.
+- Compare traceroute observations and retain route-change events.
+- Watch configurable hop patterns and show local-versus-remote context.
+- Maintain incident history and configurable alerts.
+- Export CSV/JSON evidence and generate PDF reports.
+- Separate observed network hops from an optional geographic illustration.
+
+## Engineering notes
+
+| Decision | Why it matters |
+| --- | --- |
+| Always-on agent independent of the browser | Monitoring continues when nobody has the dashboard open |
+| One Node process and SQLite store | Collection and API access share a straightforward operational model |
+| Configured thresholds retain priority | An adaptive baseline must not normalize persistently poor performance |
+| Consecutive-sample status changes | A single noisy reading need not become an incident |
+| Evidence separate from interpretation | A route change proves that the observed path changed, not why an ISP changed it |
+| PDF generation without a browser engine | Reports do not require a headless browser on the monitoring machine |
+
+**Application stack:** Node.js · TypeScript · Express · SQLite/better-sqlite3 · React · Vite · Tailwind CSS · Recharts · Windows Service · PDFKit
+
+Remote dashboard access can use Cloudflare Pages, Tunnel, and an appropriate access gate; the collection agent remains on the monitoring host.
+
+## Project scope
+
+LYNX observes configured targets, not arbitrary networks. Circuit labels do not themselves force traffic through a chosen ISP; that requires routing or separate monitoring hosts. Geographic annotations do not replace traceroute evidence, and path observations alone do not establish a routing root cause.
+
+The application's existing MIT license remains in its private source repository. This separate repository publishes showcase materials rather than a runnable application distribution; see [NOTICE.md](NOTICE.md) for those materials.
+
+## More projects
+
+[FloorLink — browser screen sharing](https://github.com/deadwayz/floorlink-showcase) · [HYLE — IT asset management](https://github.com/deadwayz/hyle-showcase) · [Creator's GitHub profile](https://github.com/deadwayz)
